@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> Basic Technical Concepts</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body class="tron-grid">
+
+    <div class="toc tron-panel">
+      <div class="toc">
+<h2>Table of Contents</h2>
+<ul>
+<ul>
+<li><a href="#basic-technical-concepts">Basic Technical Concepts</a></li>
+<ul>
+<li><a href="#data-representation">Data Representation</a></li>
+<ul>
+<li><a href="#bits-and-bytes">Bits and Bytes</a></li>
+<li><a href="#larger-units">Larger Units</a></li>
+<li><a href="#binary-hexadecimal-and-ascii">Binary, Hexadecimal and ASCII</a></li>
+</ul>
+<li><a href="#storage-devices">Storage Devices</a></li>
+<ul>
+<li><a href="#hard-disk-drives-hdds">Hard Disk Drives (HDDs)</a></li>
+<ul>
+<li><a href="#key-components">Key Components</a></li>
+<li><a href="#how-hdds-work">How HDDs Work</a></li>
+<li><a href="#types-of-hdds">Types of HDDs</a></li>
+<li><a href="#advantages-and-disadvantages-of-hdds">Advantages and Disadvantages of HDDs</a></li>
+</ul>
+<li><a href="#solid-state-disks-ssds">Solid State Disks (SSDs)</a></li>
+<ul>
+<li><a href="#key-components-of-ssds">Key Components of SSDs</a></li>
+<li><a href="#how-ssds-work">How SSDs Work</a></li>
+<li><a href="#types-of-ssds">Types of SSDs</a></li>
+<li><a href="#advantages-and-disadvantages-of-ssds">Advantages and Disadvantages of SSDs</a></li>
+<li><a href="#trim">TRIM</a></li>
+<li><a href="#garbage-collection">Garbage Collection</a></li>
+<li><a href="#wear-leveling">Wear Leveling</a></li>
+</ul>
+</ul>
+<li><a href="#volumes-and-partitions">Volumes and Partitions</a></li>
+<ul>
+<li><a href="#what-is-a-partition">What is a Partition</a></li>
+<li><a href="#what-is-a-volume">What is a Volume</a></li>
+<li><a href="#types-of-partitions">Types of Partitions</a></li>
+<ul>
+<li><a href="#1-primary-partition">1. Primary Partition</a></li>
+<li><a href="#2-extended-partition">2. Extended Partition</a></li>
+<li><a href="#3-logical-partition">3. Logical Partition</a></li>
+</ul>
+<li><a href="#partitioning-schemes">Partitioning Schemes</a></li>
+<ul>
+<li><a href="#1-mbr-master-boot-record">1. MBR (Master Boot Record)</a></li>
+<li><a href="#2-gpt-guid-partition-table">2. GPT (GUID Partition Table)</a></li>
+</ul>
+<li><a href="#filesystems">Filesystems</a></li>
+<ul>
+<li><a href="#common-filesystems">Common Filesystems:</a></li>
+</ul>
+<li><a href="#hidden-features-on-windows">Hidden Features on Windows</a></li>
+<ul>
+<li><a href="#1-efi-system-partition">1. EFI System Partition</a></li>
+<li><a href="#2-recovery-partition">2. Recovery Partition</a></li>
+<li><a href="#oem-partition">OEM Partition</a></li>
+<li><a href="#microsoft-reserved-partition">Microsoft Reserved Partition</a></li>
+</ul>
+</ul>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</ul>
+</div>
+
+    </div>
+
+    <main class="tron-content">
+      <h1 id="basic-technical-concepts">Basic Technical Concepts</h1>
+<p>Throughout this file, we'll be going through some basic concepts that are important during the technical part of a forensic investigation.</p>
+<p>We'll be talking about how data is represented, how data is stored, how disks are partitioned and some hidden features that are in disks</p>
+<h2 id="data-representation">Data Representation</h2>
+<p>The data that we see on the screen of a laptop or a machine, is not how data is stored and read in the internals of a computer.
+Data is stored in the form of <code>bits</code>, <code>bytes</code>, <code>binary</code>, <code>hexadecimal</code>, and <code>ASCII</code></p>
+<h3 id="bits-and-bytes">Bits and Bytes</h3>
+<p>Computers communicate using <strong>binary</strong>. Binary values are one of two values or states. Either <code>off</code> or <code>on</code>. <code>0</code> or <code>1</code>. <code>yes</code> or <code>no</code>.
+Computers use the <code>presence of current (1)</code> or <code>absence of current (0)</code> in order to represent states.</p>
+<p>A <strong>bit</strong> is a single binary digit. It's the smallest unit of data. A <strong>bit</strong> takes the values <code>0</code> or <code>1</code>.</p>
+<p>A group of <strong>8 bits</strong> together is called as a <strong>byte</strong>. One byte is used to represent a single character or a symbol.</p>
+<h3 id="bits-and-bytes">Larger Units</h3>
+<p>When it comes to storing data, bits and bytes don't really help because majority of the files that have to be stored contain a lot of data, which cannot be represented with single bytes.</p>
+<p>In order to take care of this, we use Kilobytes, Megabytes and Gigabytes.</p>
+<ul>
+<li>1 Kilobyte(KB) = 1000 bytes</li>
+<li>1 Megabyte(MB) = 1000 Kilobytes</li>
+<li>1 Gigabyte(GB) = 1000 Megabytes</li>
+</ul>
+<p>These are the standard storage metrics, but there are other metrics that are used like Kibibytes, and Kilobits</p>
+<p>Kibi/Mebi/Gibi bytes are used in some technical contexts where the binary system is used</p>
+<ul>
+<li>1 Kibibyte(KiB) = 1024 bytes</li>
+<li>1 Mebibyte(MiB) = 1024 Kibibytes</li>
+<li>1 Gibibyte(GiB) = 1024 Mebibytes</li>
+</ul>
+<p>When it comes to data transfer however, we don't speak in terms of bytes. We use Kilo/Mega/Giga bits instead of bytes</p>
+<ul>
+<li>1 Kilobit(Kb) = 1000 <strong>bits</strong></li>
+<li>1 Megabit(Mb) = 1000 <strong>bits</strong></li>
+<li>1 Gigabit(Gb) = 1000 <strong>bits</strong></li>
+</ul>
+<p>Have a look at the difference of the casing in the units. When the <code>b</code> is lowercase, we're speaking in terms of <code>bits</code>, when <code>B</code> is capitalised, we're speaking in terms of <code>bytes</code></p>
+<p>KB, MB, GB etc are used in storage devices. KiB, MiB, GiB are used in terms of storage, but at the lower level where precision is important in calculation. Kb, Mb and Gb are used in terms of network speeds or transfer speeds</p>
+<h3 id="bits-and-bytes">Binary, Hexadecimal and ASCII</h3>
+<p>Like mentioned earlier, Binary is used by computers in order to create, store and transfer data. <code>1010</code> is an example of a binary string that can be stored in the computer directly</p>
+<p>Hexadecimal is a <em>compact</em> way of representing binary data. Binary data has only 2 symbols, <code>0</code> and <code>1</code>, while Hexadecimal has 16 symbols that can be used to represent data. It takes the symbols <code>0-9</code> and <code>A-F</code> in order to represent data. Each hex digit equals 4 binary digits.</p>
+<p>For example: <code>101111</code> in binary can be represented as <code>BF</code> in Hexadecimal. It's a more concise way of showing data.</p>
+<p><strong>ASCII</strong> maps characters to numbers, allowing for text or symbols to be stored in numeric form to easily store data. For example <code>A = 65</code> in the ASCII standard</p>
+<hr>
+<h2 id="data-representation">Storage Devices</h2>
+<p>Storage is one of the most important things that we use in everyday life when we're using a computer. Modern computers use two kinds of storage devices, namely <strong>Hard Disk Drives</strong> and <strong>Solid State Drives</strong></p>
+<h3 id="bits-and-bytes">Hard Disk Drives (HDDs)</h3>
+<p>HDDs are the traditional storage devices that use Magnetic storage in order to store data. It's also a non-volatile storage device. It consists of one or more spinning disks (called platters) coated with magnetic material. Data is written to and read from the surface of these platters using read/write heads that move very quickly across the surface.</p>
+<p>HDDs are one of the oldest types of storage devices, but they are still widely used today in laptops, desktops and servers because of their low cost and high storage capacity.</p>
+<h4 id="key-components">Key Components</h4>
+<ul>
+<li><strong>Platters:</strong> These are the disks that are inside the HDD where the data is stored magnetically</li>
+<li><strong>Spindle:</strong> The spindle is what spins the platters at high speeds. HDDs usually spin at 5400 to 7200 RPM in consumer drives</li>
+<li><strong>Read/Write Heads:</strong> These are the components that read and write data to the platters. These heads float just above the platter surface as the disk spins</li>
+<li><strong>Actuator Arm:</strong> This part is what moves the read/write heads to the correct position over the platter.</li>
+</ul>
+<h4 id="key-components">How HDDs Work</h4>
+<p>HDDs store data magnetically on these rotating platters. These platters are further divided into tracks and sectors. Each sector is a small unit where data is stored. The read/write heads move across these platters, altering the magnetic state of the material to either store or retrieve data.</p>
+<p>When a file is saved to a HDD, it is broken down into smaller pieces and written across the platter in various sectors. The spinning platters ensure that the read/write heads can access different sectors quickly, allowing for quick data retrieval.</p>
+<h4 id="key-components">Types of HDDs</h4>
+<ol>
+<li><p><strong>Internal HDD:</strong> These are the hard drives that are installed inside computers and servers. They connect to the motherboard via interfaces like SATA.</p>
+</li>
+<li><p><strong>External HDD:</strong> These are portable drives that can be carried around and connected to computers via USB, Thunderbolt or other interfaces. These are usually used for portable storage or backup</p>
+</li>
+</ol>
+<h4 id="key-components">Advantages and Disadvantages of HDDs</h4>
+<ul>
+<li><p><strong>Large Storage Capacity:</strong> HDDs are available in large storage sizes, usually in Terabytes, making them ideal for storing large amounts of data.</p>
+</li>
+<li><p><strong>Cost-Effective:</strong> Compared to other storage devices, HDDs give a lower cost per storage ratio, making them a popular choice for people and businesses that value their pockets</p>
+</li>
+<li><p><strong>Long History:</strong> HDDs have been around for so many decades, and it doesn't look like they are going to leave anytime soon. Since they have been around for so long, they have a proven history of being reliable when used properly</p>
+</li>
+<li><p><strong>Slow speed:</strong> We did speak about how the spindle spins very quickly in order to give high speeds of retrieval, but they are slow when compared to other data storages like SSDs. Since a HDD has mechanical parts, the spinning platters create latency, making data access slower</p>
+</li>
+<li><p><strong>Physical Damage:</strong> HDDs rely on moving parts, so any small drop or disturbance can damage the moving parts of the HDD very easily</p>
+</li>
+<li><p><strong>Side Effects:</strong> Due to the mechanical parts of the spinning platters, they create a lot of noise and heat, which can lead to degradation over time.</p>
+</li>
+</ul>
+<p>Here is a small <a href="https://www.youtube.com/watch?v=tDacjrSCeq4">video</a> that shows a server room that has HDDs. In this video we see how loud HDDs are and how external disturbances like noise can disturb and increase latency of a HDD</p>
+<h3 id="bits-and-bytes">Solid State Disks (SSDs)</h3>
+<p>A Solid State Drive is a type of non-volatile storage device that uses <strong>NAND flash memory</strong> to store data. Unlike HDDs, these don't have any moving parts. Data is stored in memory chips that retain information even when power is switched off. This makes SSDs faster and more durable than HDDs</p>
+<p>SSDs are majorly used in more recent laptops and desktops due to their speed, efficiency and reliability</p>
+<h4 id="key-components">Key Components of SSDs</h4>
+<ul>
+<li><strong>NAND Flash Memory:</strong> This is the primary storage medium of SSDs made of memory cells that store data. There are several types of NAND, like Single Level Cell, Multi-Level, Triple-Level and Quad-Level. Each of these offer different endurance and performance</li>
+<li><strong>Controller:</strong> This is what manages data read/write operations between the computer and the NAND Flash Memory, optimizing performance and wear leveling</li>
+<li><strong>DRAM Cache:</strong> Many SSDs include a DRAM Cache that stores frequently accessed data to improve read/write speeds</li>
+</ul>
+<h4 id="key-components">How SSDs Work</h4>
+<p>SSDs use NAND flash memory to store data in cells made up of <strong>floating-gate transistors</strong>. These memory cells are grouped into <strong>pages</strong> and these pages are grouped into <strong>blocks</strong>. Data is written to these blocks in pages, and blocks must be erased before new data can be written to them</p>
+<p>When the system requests for data, the controller gets it from the memory cells. Since SSDs have no moving parts, data retrieval is much faster when compared to HDDs.</p>
+<h4 id="key-components">Types of SSDs</h4>
+<ol>
+<li><strong>SATA SSDs:</strong> These are designed to be a replacement to traditional HDDs. The connect using the SATA interface, providing a significant speed boost when compared to HDDs, but they are still limited by the older SATA interface's maximum speed</li>
+<li><strong>NVMe SSDs:</strong> NVMe stands for Non-Volatile Memory Express. These SSDs use the PCIe (Peripheral Component Interconnect Express) interface, offering a much faster data transfer speed when compared to SATA interfaces. These are used in high-performance machines like gaming machines and servers.</li>
+</ol>
+<h4 id="key-components">Advantages and Disadvantages of SSDs</h4>
+<ul>
+<li><p><strong>Faster Speed:</strong> SSDs provide much faster read/write speeds compared to HDDs</p>
+</li>
+<li><p><strong>Durability:</strong> SSDs have no moving parts, which make them more resistant to physical shock and damage. This is useful for devices that may be subjected to loud areas, vibrations or drops</p>
+</li>
+<li><p><strong>Low Power Consumption:</strong> SSDs use less power than HDDs, contributing to longer batter life in laptops and lower energy costs in data centers</p>
+</li>
+<li><p><strong>Quieter Operation:</strong> Since there are moving parts, SSDs are quieter when compared to HDDs</p>
+</li>
+<li><p><strong>Higher Costs:</strong> SSDs are more expensive per GB compared to HDDs, making them <em>less</em> cost effective when compared to HDDs</p>
+</li>
+<li><p><strong>Limited Write Ability:</strong> NAND Flash Memory cells have a limited number of write/erase cycles before they wear out. The number of cycles doesn't matter to you and I, but for write intensive workloads, it can reduce the lifespan of the SSD</p>
+</li>
+<li><p><strong>Lower Storage Capacity:</strong> While SSDs do come in large sizes, they still are not as big as HDDs. The higher the storage of an SSD, the more the price of the SSD.</p>
+</li>
+</ul>
+<h4 id="key-components">TRIM</h4>
+<p><strong>TRIM</strong> is a command that helps the Operating System in identifying which blocks are no longer in use and which can be rewritten in an SSD. This way, the SSD can access only the blocks holding the data. Also when the delete command is issued, the TRIM command immediately wipes the pages/blocks that have been marked for deletion where the files are stored.</p>
+<p>When data needs to be deleted from an SSD, it doesn't matter if the data is a small part of the block, the SSD wipes the entire block itself. This means that the remaining data has to be stored in a buffer memory, then the block has to be wiped, then the data has to be restored. This is not an efficient way of wiping or erasing memory.
+This means that the SSD is going to have a very poor performance if it has to keep doing this. It writes to buffer memory, wipes a block, then rewrites the SSD from the buffer. This can lead to a lot of erasing and rewriting, which leads to fast degradation of the flash memory chips.</p>
+<p>TRIM ensures that this doesn't happen. Instead of managing whole blocks, a TRIM enabled SSD can work with the pages. It marks unused blocks, so that the SSD knows which blocks can be wiped and reused</p>
+<h4 id="key-components">Garbage Collection</h4>
+<p><strong>Garbage Collection</strong> is an important part of SSDs which allows for easy rewriting and deleting of data. What a GC does is that it takes all of the pages that are marked by the TRIM command and stores them all into one block.</p>
+<p>The GC moves the pages that are marked as unused by the <strong>TRIM</strong> command into another block and replaces all of the used data into another block. In general, all the pages that are unused are collected into one block, and the used data is moved to another block.</p>
+<p>The block that contains all of the unused data is then nuked and a new block is generated. This is how SSDs easily remove unused data</p>
+<h4 id="key-components">Wear Leveling</h4>
+<p><strong>Wear Leveling</strong> is a process that is designed to extend the life of SSDs. It ensures all memory blocks experience a similar number of write/erase cycles. If only the beginning few cells are being used to store all of the information, those few cells will be read from, written to and erased the most number of times.</p>
+<p>Over time, these few cells will wear out very quickly, while the other cells are left untouched. This is not an ideal scenario because it doesn't utilize the entire SSD.</p>
+<p>Wear Leveling uses an algorithm in order to track the number of writes to each block and make decisions on where to store the new data. This is accomplished using one of three processes: <strong>dynamic</strong>, <strong>static</strong> and <strong>global</strong> wear leveling</p>
+<ul>
+<li><strong>Dynamic Wear Leveling:</strong> It selects the block with the lowest erasure count for the next write.</li>
+<li><strong>Static Wear Leveling:</strong> Blocks of static data are moved when their erasure count falls below a threshold. This additional step of moving data <em>can</em> slow write cycle performance, but this is more effective than dynamic wear leveling for extending the life span of SSDs</li>
+<li><strong>Global Wear Leveling:</strong> It divides the entire storage into multiple zones, ensuring write activity is distributed across the entire device. If one zone has more write cycles, the controller intervenes and redirects data to a different zone</li>
+</ul>
+<h2 id="data-representation">Volumes and Partitions</h2>
+<p>When data is stored on a storage device like an HDD or SSD, it is organized in a specific way to make it easier to manage. This organization is achieved with the help of <strong>partitions</strong> and <strong>volumes</strong>. These structures help the OS manage how data is stored, retrieved and access data efficiently.</p>
+<h3 id="bits-and-bytes">What is a Partition</h3>
+<p>A <strong>partition</strong> is a logical division of a physical storage device like a HDD or an SSD. It acts as a separate section of the disk that can be managed independently. A single storage can be split into multiple partitions allowing different filesystems, operating systems or storage purposes.</p>
+<p>Example:</p>
+<ul>
+<li>On a Windows drive, many of you would have made partitions which include the C Drive and the D Drive. These are logical divisions on the same drive.</li>
+<li>A dual-boot machine will have separate partitions for Windows and Linux. Although they are on the same physical disk, they have different filesystems and allow different Operating Systems.</li>
+</ul>
+<h3 id="bits-and-bytes">What is a Volume</h3>
+<p>A <strong>volume</strong> is a storage space that has been formatted with a filesystem and is ready to store data. A volume can exist within a single partition or span across multiple partitions. The volumes that are spanning across multiple partitions can be spanned or striped volumes. Once a filesystem is assigned to a partition, it becomes a volume.</p>
+<blockquote>
+<p>A <strong>partition</strong> is a reserved space on a disk, while a <strong>volume</strong> is a usable storage unit.</p>
+</blockquote>
+<h3 id="bits-and-bytes">Types of Partitions</h3>
+<p>There are three main types of partitions: <strong>Primary</strong>, <strong>Extended</strong>, and <strong>Logical</strong>.</p>
+<h4 id="key-components">1. Primary Partition</h4>
+<p>A <strong>primary partition</strong> is the main type of partition that can store an Operating System or user data. A storage device can have up to <strong>four</strong> primary partitions, or three primary partitions + one extended partition.</p>
+<ul>
+<li>The <strong>bootable partition</strong> (where the OS is installed) must be a primary partition</li>
+<li>If there are multiple OSes, each must have its own primary partition</li>
+</ul>
+<h4 id="key-components">2. Extended Partition</h4>
+<p>Since the traditional Master Boot Record partitioning allowed only <strong>four</strong> primary partitions, an extended partition as introduced to overcome this limitation</p>
+<ul>
+<li>An extended partition is a special type of partition that <strong>does not</strong> store any data directly, but acts as a container for multiple logical partitions</li>
+<li>A disk can have <strong>only one</strong> extended partition, but it can hold many logical partitions inside it.</li>
+</ul>
+<h4 id="key-components">3. Logical Partition</h4>
+<p>A <strong>logical partition</strong> is created inside an extended partition. It functions just like a primary partition, but does not have boot capabilities.</p>
+<ul>
+<li>Logical partitions are mainly used for storing user data or additional operating systems</li>
+<li>Unlike primary partitions, there is no strict limit on how many logical partitions can be created.</li>
+</ul>
+<h3 id="bits-and-bytes">Partitioning Schemes</h3>
+<p>Partitioning Schemes define how data is stored and accessed on a storage device. The two most common schemes are <strong>Master Boot Record</strong> and <strong>GUID Partition Table</strong></p>
+<h4 id="key-components">1. MBR (Master Boot Record)</h4>
+<p>MBR is an older partitioning method that has been used since the early days of personal computers</p>
+<ul>
+<li>Supports only 4 primary partitions, or 3 primary + 1 extended</li>
+<li>Supports a maximum of 2TB of storage</li>
+<li>Stores partitioning information in the first sector of the disk</li>
+<li>Compatible with old BIOS-based systems</li>
+</ul>
+<blockquote>
+<p><strong>WARNING:</strong> If the MBR sector gets corrupted, the entire partition table can be rendered selects</p>
+</blockquote>
+<h4 id="key-components">2. GPT (GUID Partition Table)</h4>
+<p>GPT is the modern partition scheme that replaces MBR. It is part of the <strong>UEFI (Unified Extensible Firmware Interface)</strong> standard</p>
+<ul>
+<li>Supports up to <strong>128 primary partitions</strong>. This removes the point of extended and logical partitions</li>
+<li>Can support up to <strong>9.4 zettabytes</strong> (Out of this scope. I am not doing the math)</li>
+<li>Stores partitioning data across the entire disk, so there is no single point of failure</li>
+<li>Required for UEFI based systems and necessary for booting modern Operating Systems</li>
+</ul>
+<blockquote>
+<p><strong>WARNING:</strong> Older BIOS systems may not support GPT without extra configurations</p>
+</blockquote>
+<h3 id="bits-and-bytes">Filesystems</h3>
+<p>A <strong>filesystem</strong> is a structure that defines how data is stored, organized and accessed on a partition or a volume. Different operating systems support different filesystems.</p>
+<h4 id="key-components">Common Filesystems:</h4>
+<p>| Filesystem | OS Support            | Max File Size | Max Volume Size | Features                                        |
+| ---------- | --------------------- | ------------- | --------------- | ----------------------------------------------- |
+| <strong>FAT32</strong>  | Windows, macOS, Linux | 4GB           | 2TB             | Universal compatibility but outdated            |
+| <strong>exFAT</strong>  | Windows, macOS, Linux | 16EB          | 128PB           | Ideal for USB drives and large files            |
+| <strong>NTFS</strong>   | Windows               | 16TB          | 8PB             | Journaling, file compression, encryption        |
+| <strong>ext4</strong>   | Linux                 | 16TB          | 1EB             | Default for Linux, better performance than ext3 |
+| <strong>APFS</strong>   | macOS                 | 8EB           | 8EB             | Optimized for SSDs, snapshots, encryption       |</p>
+<p>We'll get more into each of these filesystems in a different page.</p>
+<h3 id="bits-and-bytes">Hidden Features on Windows</h3>
+<p>Some partitions on a disk are hidden from normal users, but without these partitions, the entire system goes to trash</p>
+<h4 id="key-components">1. EFI System Partition</h4>
+<ul>
+<li>Found on <strong>GPT</strong> formatted disks in <strong>UEFI</strong> systems.</li>
+<li>Stores bootloaders, firmware drivers and essential system files.</li>
+<li>Without this partition, the Operating System <strong>will not boot</strong></li>
+</ul>
+<h4 id="key-components">2. Recovery Partition</h4>
+<ul>
+<li>Contains recovery tools to restore the OS in case of corruption or failure</li>
+<li>Hidden from user, but can be removed because this takes a lot of storage in some cases.</li>
+</ul>
+<h4 id="key-components">OEM Partition</h4>
+<ul>
+<li>Created by manufacturers to store <strong>diagnostic tools</strong>, <strong>backup images</strong> or <strong>pre-installed software</strong></li>
+<li>Typically hidden and cannot be accessed without special tools</li>
+</ul>
+<h4 id="key-components">Microsoft Reserved Partition</h4>
+<ul>
+<li>Used by Windows(ew) on GPT Disks</li>
+<li>Ensures compatibility with future updates</li>
+</ul>
+<h2 id="data-representation">Conclusion</h2>
+<p>From bits and bytes to HDDs and SSDs, we've covered a lot about how data is stored, organized and managed inside of a computer. Understanding how data is being stored in these storage devices is very crucial for forensic investigators and system management in general. Data isn't stored the way we see it, it exists as binary, hex or ASCII. Storage devices like HDDs, SSDs have their own mechanisms, advantages and disadvantages which impacts how data is accessed.</p>
+<p>Partitioning and filesystems determine how storage is structured and managed. Whether dealing with MBR or GPT, NTFS or ext4, each system has its own strengths and weaknesses, making it essential to choose the right setup for a given task.</p>
+<p>Finally, hidden partitions play a critical role in system functionality and recovery. These partitions help in booting the OS, or to allow us to roll back the OS if we didn't like a new update (Looking at you Copilot). Knowing how these components interact with each other and with the user allows investigators to better understand, investigate, troubleshoot and secure data.</p>
+
+    </main>
+
+    <hr class="neon-divider">
+
+    <div class="navigation-menu tron-panel">
+      <a href="C++-SSG.html">←  Writing my own Static Site Generator in C++</a> | <a href="index.html">Home</a> | <a href="Doom.html"> Evolution of DOOM →</a>
+    </div>
+
+  </body>
+</html>

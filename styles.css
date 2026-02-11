@@ -1,0 +1,47 @@
+body.tron-grid {
+  background: black;
+  color: cyan;
+  font-family: sans-serif;
+  padding: 40px;
+  background-image:
+    linear-gradient(#0ff2 1px, transparent 1px),
+    linear-gradient(90deg, #0ff2 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glow, h1, h2, h3 {
+  color: cyan;
+  text-shadow: 0 0 8px cyan, 0 0 15px cyan;
+}
+
+.tron-panel {
+  background: #0b0b0b;
+  border: 1px solid cyan;
+  box-shadow: 0 0 10px cyan, inset 0 0 10px #00ffee45;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 2rem;
+}
+
+.tron-content {
+  border-left: 2px solid cyan;
+  padding-left: 20px;
+}
+
+.neon-divider {
+  border: none;
+  height: 1px;
+  background: cyan;
+  box-shadow: 0 0 8px cyan;
+  margin: 2rem 0;
+}
+
+a {
+  color: cyan;
+  text-decoration: none;
+}
+
+a:hover {
+  text-shadow: 0 0 8px cyan, 0 0 15px cyan;
+  text-decoration: underline;
+}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> Digital Forensic Investigation and Tools</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body class="tron-grid">
+
+    <div class="toc tron-panel">
+      <div class="toc">
+<h2>Table of Contents</h2>
+<ul>
+<ul>
+<li><a href="#steps-in-forensic-investigation">Steps in Forensic Investigation</a></li>
+<li><a href="#role-of-tools">Role of Tools</a></li>
+<ul>
+<li><a href="#why-use-tools">Why use Tools?</a></li>
+<li><a href="#types-of-tools">Types of Tools</a></li>
+</ul>
+<li><a href="#acquisition">Acquisition</a></li>
+<ul>
+<li><a href="#common-tools-for-acquisition">Common Tools for Acquisition</a></li>
+<ul>
+<li><a href="#dd">dd</a></li>
+<ul>
+<li><a href="#creating-a-forensic-image">Creating a Forensic Image</a></li>
+<ul>
+<li><a href="#forensic-image-of-a-flash-drive-">**Forensic Image of a Flash Drive** </a></li>
+<li><a href="#make-a-forensic-image-of-a-partition">**Make a Forensic Image of a Partition**</a></li>
+</ul>
+<li><a href="#best-practices">Best Practices</a></li>
+</ul>
+<li><a href="#guymager">Guymager</a></li>
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#creating-a-forensic-image">Creating a Forensic Image</a></li>
+</ul>
+</ul>
+</ul>
+<li><a href="#wrapping-it-up">Wrapping It Up</a></li>
+</ul>
+</div>
+
+    </div>
+
+    <main class="tron-content">
+      <p>Digital Forensics is a branch of forensic science that deals with the investigation of cybercrimes, but it can also be used to capture evidence available on any digital device at any kind of crime scene.</p>
+<p>In this series, we will be going through the <strong>basics of Forensic Investigation</strong>, dive into some common tools that we will be using and how to use those tools. For the sake of this series, I have made a custom <strong>Linux Virtual Machine</strong> specifically designed for performing basic forensic investigations.</p>
+<h1 id="steps-in-forensic-investigation">Steps in Forensic Investigation</h1>
+<p>Before we get our hands messy with some cases, we first have to look at the five major steps of Forensic Investigation</p>
+<ol>
+<li><p><strong>Acquisition:</strong>
+The process of securing and duplicating data from a crime scene without altering the original evidence</p>
+</li>
+<li><p><strong>Validation:</strong>
+Ensuring the integrity and authenticity of the acquired data by verifying against the original source.</p>
+</li>
+<li><p><strong>Extraction:</strong>
+Retrieving of meaningful information from the data like files, logs and hidden data fragments</p>
+</li>
+<li><p><strong>Reconstruction:</strong>
+Rebuilding events from the extracted data to create a clear picture of what happened</p>
+</li>
+<li><p><strong>Reporting:</strong>
+Documenting findings in a comprehensive manner so that it can be presented and understood in court.</p>
+</li>
+</ol>
+<p>Each of these steps are important in making sure that all of the evidence is safe and secure, and we have neat documentation of what is happening and what has happened.</p>
+<h1 id="steps-in-forensic-investigation">Role of Tools</h1>
+<p>In Digital Forensics, tools play a very important role. They help us take the raw data we have and convert them into usable and presentable information. Some tasks can be done manually but are extremely time consuming. To tackle this, forensic tools offer many advantages</p>
+<br />
+## Why use Tools?
+<ol>
+<li><p><strong>Efficiency</strong> - Manually examining and processing large amounts of information
+can be very time consuming and prone to oversight - Tools can perform these repetitive tasks and simplify
+complex tasks that reduce the time needed for analysis</p>
+</li>
+<li><p><strong>Precision and Accuracy</strong></p>
+</li>
+</ol>
+<ul>
+<li>Tools are designed to follow standard patterns and practices, ensuring a high level of accuracy</li>
+<li>They can be used to detect and recover data that may have been overlooked such as broken partitions or hidden files</li>
+</ul>
+<ol start="3">
+<li><strong>Integrity</strong></li>
+</ol>
+<ul>
+<li>Just like physical evidence, digital evidence can also be tampered with. To prevent this, tools ensure a &quot;write-block&quot; policy that will not allow modifications on the original evidence</li>
+<li>Tools also include hashing mechanisms to verify the integrity of the data.</li>
+</ul>
+<ol start="4">
+<li><strong>Consistency</strong></li>
+</ol>
+<ul>
+<li>Tools can be used to get the same outputs and results over and over again.</li>
+</ul>
+<h2 id="why-use-tools">Types of Tools</h2>
+<p>Forensic Tools are categorized based on what they do and what purpose they serve</p>
+<ul>
+<li><strong>Acquisition Tools:</strong> Used to create exact copies of data while preserving the integrity</li>
+<li><strong>Analysis Tools:</strong> Extract, Visualise and Interpret data like file systems and time stamps</li>
+<li><strong>Memory Forensics:</strong> Analyze the contents of Volatile Memory to see if there are anything in the current running processes</li>
+<li><strong>Network Forensics:</strong> Tools used to monitor and analyze the network traffic.</li>
+</ul>
+<p>Selecting the right tool for the job is a key skill for forensic investigators, as using the wrong tool can not give us the required outputs.
+We shall go more into these specific tools when we reach those topics.</p>
+<h1 id="steps-in-forensic-investigation">Acquisition</h1>
+<p>The first step of Forensic Investigation, Acquisition. It's involves:</p>
+<ul>
+<li>Securing the scene: Ensuring that the data remains untouched during the acquisition</li>
+<li>Creating duplicates: Using forensic tools to create an exact duplicate of the original data, bit-by-bit</li>
+</ul>
+<p>Acquisition is important, because any alteration can lead to major changes in the evidence and render the investigation useless</p>
+<h2 id="why-use-tools">Common Tools for Acquisition</h2>
+<h3 id="dd">dd</h3>
+<p>dd is a low-level command line utility that is available on all UNIX-like machines that allows us for copying and conversion of data from one location to another.
+This tool allows us to directly write files from the hardware/device drives because UNIX treats all the storage devices as files.
+When working with storage devices or RAM in UNIX, it's like working with a <em>special</em> file. We can use this to our advantage to make bit-by-bit copies of storage media</p>
+<p>Here's the basic syntax of <code>dd</code></p>
+<pre><code class="language-shell">
+dd if=&lt;input_file&gt; of=&lt;output_file&gt; [options]
+
+</code></pre>
+<ul>
+<li><strong><code>if</code></strong> is the storage device that we will be making an image of</li>
+<li><strong><code>of</code></strong> is the output file where we will be writing the forensic image to
+Output files are usually of type <strong><code>.img</code></strong> or <strong><code>.dd</code></strong> formats</li>
+</ul>
+<h4 id="creating-a-forensic-image">Creating a Forensic Image</h4>
+<p>A Forensic Image is a bit-by-bit vopy of the source media that includes everything like files, file systems and unallocated space.</p>
+<p><strong>WARNING: Make sure that you double check the device that you are reading from and writing to. There is no GUI and no confirmation message for any of this, so it is possible that you overwrite you existing Operating System. If you are not sure, then <em>do not</em> run these commands. I am not responsible for your data loss</strong></p>
+<br />
+<br />
+<br />
+##### **Forensic Image of a Flash Drive**
+<p><strong>Step 1:</strong> First we have to identify the device we will be
+making a forensic image of. This can be done with tools like <strong><code>lsblk</code></strong> and <strong><code>fdisk</code></strong> for Linux users.
+First note down all of the disks you see after running these commands. Plug in the Flash Drive, then
+run these commands again. The new disk that appears is the Flash drive that we will be making a forensic
+image of. It will be labeled as <strong><code>/dev/sda</code></strong> or <strong><code>dev/sdb</code></strong></p>
+<p><strong>Step 2:</strong> Use <strong><code>dd</code></strong> to make the forensic image of the device and store it in a file. Run the following command:</p>
+<pre><code class="language-shell">
+sudo dd if=dev/sda of=/forensic_image.dd bs=64K conv=noerror,sync status=progress
+
+</code></pre>
+<ul>
+<li><strong><code>sudo</code></strong>: We have to run this command with superuser privileges because normal users do not have access to hardware devices</li>
+<li><strong><code>if=/dev/sda</code></strong>: We are assuming that the Flash drive we have inputted is at <code>/dev/sda</code></li>
+<li><strong><code>of=forensic_image.dd</code></strong>: Telling where the image file has to be saved</li>
+<li><strong><code>bs=64K</code></strong>: This sets the block size to 64 Kilobytes. It can be used to optimize the transfer speed</li>
+<li><strong><code>conv=noerror,sync</code></strong>: This option tells <code>dd</code> to continue even if there are errors and to make sure that the input blocks are synchronized with the output, preventing data loss or corruption</li>
+<li><strong><code>status=progress</code></strong>: Displays the progress of the operation</li>
+</ul>
+<p><strong>Step 3:</strong> Once the process is complete, it's important to verify the integrity of the forensic image. This can be done by comparing the has values of the source device and the forensic image. UNIX can calculate the hash value of any file from the command line itself</p>
+<pre><code class="language-shell">
+sha256sum /dev/sda #This is the hash value of the source device
+sha256sum forensic_image.dd #This is the hash value of the forensic image created
+
+</code></pre>
+<br />
+<br />
+<br />
+##### **Make a Forensic Image of a Partition**
+<p>There are some scenarios where the entire drive need not copied, and one partition is enough. <strong><code>dd</code></strong> can also be used in such cases, we just have to change the input file that we are using.</p>
+<p>UNIX treats all device drivers and hardware as files and we can use this to our advantage. Files like <strong><code>dev/sda</code></strong> is the entire disk itself, but the file <strong><code>dev/sda1</code></strong> is a partition of the disk. In order to create a forensic image of this partition, we can do this</p>
+<pre><code class="language-shell">
+sudo dd if=/dev/sda1 of=forensic_image.dd bs=64K status=progress
+
+</code></pre>
+<h4 id="creating-a-forensic-image">Best Practices</h4>
+<ul>
+<li>Always make sure that you know what file corresponds to what what drive, as we do not want to accidentally wipe the evidence or our own data</li>
+<li>Always verify the image with the help of <strong><code>sha256sum</code></strong> or <strong><code>md5sum</code></strong></li>
+<li>Create multiple copies of the image</li>
+<li>write-block the device that is being copied</li>
+</ul>
+<h3 id="dd">Guymager</h3>
+<p>Guymager is a lightweight open source forensic imaging tool that's available only in for Debian and Arch distributions. It provides a GUI for the users who are not very confident or comfortable in using command line tools.</p>
+<h4 id="creating-a-forensic-image">Installation</h4>
+<ol>
+<li><strong>Debian Distros:</strong></li>
+</ol>
+<pre><code class="language-shell">
+sudo apt update
+sudo apt install guymager
+
+</code></pre>
+<ol start="2">
+<li><strong>Arch Distros:</strong></li>
+</ol>
+<pre><code class="language-shell">
+git clone https://aur.archlinux.org/guymager.git
+cd guymager/
+makepkg -si
+
+</code></pre>
+<p>Make sure to launch Guymager with superuser privileges, because it has to access the disk drives.</p>
+<h4 id="creating-a-forensic-image">Creating a Forensic Image</h4>
+<p><strong>Step 1:</strong> Connect the target device and note down it's Linux device path. We do not want to accidentally clone our own disk or perform any changes to our own disk, so make sure that you know prior which disk is yours</p>
+<p><em>Tip: If you are not sure what disk is what, then open <strong><code>guymager</code></strong> first without connecting the device, make a note of all available disks, then connect the USB drive</em></p>
+<p><strong>Step 2: Start the Imaging Process</strong></p>
+<ol>
+<li>In the <strong><code>Guymager</code></strong> interface, click on the device that has to be imaged</li>
+</ol>
+<p><img src="/images/Forensic-1/idle.png" alt="Idle Guymager"></p>
+<p>In this case, <strong><code>/dev/nvme0n1</code></strong> is the name of my local SSD and <strong><code>dev/sda</code></strong> is the USB drive that I have to make an image of</p>
+<ol start="2">
+<li>Right click on the device and choose <strong><code>Acquire Image</code></strong>
+<img src="/images/Forensic-1/AcquireUI.png" alt="Acquire UI"></li>
+</ol>
+<p>This is the UI that will pop up after clicking on <strong><code>Acquire Image</code></strong></p>
+<ol start="3">
+<li><p>Configure the image settings</p>
+<ul>
+<li>Choose what file extension the image has to be in</li>
+<li>Choose where the image has to be stored</li>
+<li>Select and verify the validity of the image with the hash algorithms <strong><code>MD5</code></strong>, <strong><code>SHA-1</code></strong> and <strong><code>SHA-256</code></strong></li>
+</ul>
+</li>
+<li><p>Click <strong><code>Start</code></strong> to begin the imaging process - A progress bar will appear at the disk to show how much has been done
+<img src="/images/Forensic-1/progress.png" alt="Progress Bar"></p>
+</li>
+</ol>
+<p><strong>Step 3: Verify the Image</strong>
+Once the imaging process is complete, you can tell <strong><code>Guymager</code></strong> to verify the image or you can just have it calculate the hash values.</p>
+<p>If <strong><code>Guymager</code></strong> is the one verifying the image, then it will take twice as long as normal, but if you prefer to do it manually, then you can use command line utilities like <strong><code>md5sum</code></strong> or <strong><code>sha256sum</code></strong> to verify the image's hash</p>
+<h1 id="steps-in-forensic-investigation">Wrapping It Up</h1>
+<p>Digital Forensic Investigations are a critical part of solving cybercrimes and uncovering evidence from digital devices in a crime scene. In this post, we spoke about the <strong>five major steps</strong> of forensic analysis, focused on the importance of tools and the different kinds of tools.
+Understanding these tools is the first step to becoming a skilled investigator. As we've seen, it lets us handle complex tasks very easily.</p>
+<p>In this session we've also seen about the <strong>Acquisition</strong> techniques and tools to acquire the forensic images of disks using tools like <strong><code>dd</code></strong> and <strong><code>Guymager</code></strong>. There are many more tools out there, and I encourage you to keep digging and finding more tools because investigators cannot be confined to only one or two tools.</p>
+<p>In the next part of this series, we will see how to <strong>Extract</strong> information and store it in a useful manner.</p>
+
+    </main>
+
+    <hr class="neon-divider">
+
+    <div class="navigation-menu tron-panel">
+      <a href="Doom.html">←  Evolution of DOOM</a> | <a href="index.html">Home</a> | <a href="VueJS-demo.html"> How to make an application with VueJS →</a>
+    </div>
+
+  </body>
+</html>

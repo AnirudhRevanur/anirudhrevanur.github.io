@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> Writing my own Static Site Generator in C++</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body class="tron-grid">
+
+    <div class="toc tron-panel">
+      <div class="toc">
+<h2>Table of Contents</h2>
+<ul>
+<ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#why-c">Why C++?</a></li>
+<li><a href="#project-structure">Project Structure</a></li>
+<li><a href="#breaking-down-the-problem">Breaking Down the Problem</a></li>
+<ul>
+<li><a href="#reading-markdown-files">Reading Markdown Files</a></li>
+<li><a href="#parsing-frontmatter">Parsing Frontmatter</a></li>
+<li><a href="#converting-markdown-to-html">Converting Markdown to HTML</a></li>
+<li><a href="#generating-table-of-contents">Generating Table of Contents</a></li>
+<li><a href="#rendering-templates">Rendering Templates</a></li>
+<li><a href="#post-navigation">Post Navigation</a></li>
+<li><a href="#generating-the-index-page">Generating the Index Page</a></li>
+</ul>
+<li><a href="#putting-everything-together">Putting Everything Together</a></li>
+<li><a href="#what-i-learnt">What I Learnt</a></li>
+</ul>
+</div>
+
+    </div>
+
+    <main class="tron-content">
+      <p>Static Site Generators are simple tools that do what they say. They build a static website.
+Meaning it shows information that the server decides to show, and limits the user interactivity.</p>
+<p>It does seem counter-intuitive in this age and era of having over-the-top websites for blogs and portfolio websites, but it doesn't make sense to include all that interactivity on a blog website.</p>
+<p>While my previous SSG worked very well for me, over a period of time it became more of a problem than a solution.
+Constant emails from Vercel warning me about outdated versions of Node and React, slow build and deploy times, and so many more issues.</p>
+<p>In this article I'll explain how I replaced a 200-file NextJS based SSG with a simple 250-line C++ code that does the same</p>
+<h1 id="requirements">Requirements</h1>
+<p>Before I did anything about this project, I asked myself,</p>
+<blockquote>
+<p>&quot;Is this even necessary?&quot;</p>
+</blockquote>
+<p>I decided to ignore the voices in my head and did it anyway.</p>
+<p>At its core, the problem was simple: take a Markdown file and render it as an HTML on a browser.
+Now that the main problem statement was defined, the question was, how do we do it?</p>
+<p>The first thought that comes to mind is, is there a JS module that does this?
+The answer is Yes. Doesn't matter, there's a JS module for everything, but I decided that I wanted a break from JS and I decided to do stuff in C++.</p>
+<p>Now the main requirements were:</p>
+<ul>
+<li>Read a Markdown File</li>
+<li>Follow a template</li>
+<li>Generate HTML files</li>
+<li>Deploy the HTML file somewhere so users can see it</li>
+</ul>
+<p>There was no need for any fancy JS magic. Since it is a blog website, it's more of a one way communication. I put out what I want to, and you consume it whether you like it or not.</p>
+<h1 id="requirements">Why C++?</h1>
+<p>I'm known for doing weird stuff in weird languages.</p>
+<p>Oh what's that? You have to use TypeScript for making websites? Nahhhh, I choose to make an <a href="https://github.com/AnirudhRevanur/rsa-tool">unsafe implementation of RSA</a> in TypeScript.
+So just like that I said, &quot;Hey, what could be a weird language that I can use here?&quot;. Since I was learning C++, I decided to make a C++ project, which ended up to be this Static Site Generator.</p>
+<p>Apart from me being me, C++ also has its own advantages over JS/TS.</p>
+<ul>
+<li>C++ is <strong>fast</strong>, and I mean fast</li>
+<li>Build times are very low</li>
+<li>A single binary output can do everything</li>
+<li>It has the same behaviour every run (Looking at you React Hydration)</li>
+</ul>
+<h1 id="requirements">Project Structure</h1>
+<p>The project has a very simple structure and it looks like this</p>
+<pre><code>.
+├── content
+│   └── &lt;all-blogs&gt;.md
+├── Makefile
+├── README.md
+├── src
+│   └── main.cpp
+├── static
+│   └── images
+│       └── &lt;Blog Name&gt;
+│           └── &lt;images-needed&gt;.png
+└── templates
+    ├── index.html
+    ├── layout.html
+    └── styles.css
+</code></pre>
+<ul>
+<li><code>content/</code> directory contains all the blogs that you see.</li>
+<li><code>Makefile</code> compiles and generates the compiled binary output.</li>
+<li><code>src/</code> contains all the code files, which turns out to be one file with 250 lines (subject to change as I add more features).</li>
+<li><code>static/</code> stores all the images that are needed for blogs.</li>
+<li><code>templates/</code> contains:<ul>
+<li><code>index.html</code> which is the homepage</li>
+<li><code>layout.html</code> is the template for the actual blog</li>
+<li><code>styles.css</code> is what is giving the glow effect, and the TRON Grid on the background.</li>
+</ul>
+</li>
+</ul>
+<h1 id="requirements">Breaking Down the Problem</h1>
+<p>So right now, we have a clearly defined problem statement, which is to convert a Markdown file into an HTML file which can be deployed.</p>
+<p>The right thing to do is to break down this problem into smaller problems so that my goldfish brain can actually do its work.</p>
+<p>This is what the SSG has to do:</p>
+<ul>
+<li>Read Markdown Files</li>
+<li>Parse the Frontmatter</li>
+<li>Convert Markdown to HTML</li>
+<li>Generate a Table of Contents</li>
+<li>Render on templates</li>
+<li>Post Navigation</li>
+<li>Generate Index Page</li>
+</ul>
+<p>Let's go through each one of these one by one</p>
+<h2 id="reading-markdown-files">Reading Markdown Files</h2>
+<p>The first thing that the SSG has to do is read Markdown Files from the <code>content/</code> directory. I used C++17's <code>&lt;filesystem&gt;</code> library in order to walk through the directory and process only the .md files.</p>
+<pre><code class="language-c++">
+  for (auto &amp;entry : fs::directory_iterator(&quot;content&quot;)) {
+    if (entry.path().extension() != &quot;.md&quot;)
+      continue;
+
+    string md = readFile(entry.path().string());
+
+</code></pre>
+<p>This loop goes through every file in the <code>content/</code> directory. If the file is not a .md, it's skipped.</p>
+<p>Each md file is then read into memory with a small helper function (readFile)</p>
+<pre><code class="language-c++">
+string readFile(const string &amp;path) {
+  ifstream in(path, ios::in | ios::binary);
+  if (!in)
+    throw runtime_error(&quot;Failed to open file: &quot; + path);
+  ostringstream ss;
+  ss &lt;&lt; in.rdbuf();
+  return ss.str();
+}
+</code></pre>
+<p>I figured I'd make this its own function since I'd be reading from a file very frequently in this project.</p>
+<h2 id="reading-markdown-files">Parsing Frontmatter</h2>
+<p>Now you don't see this in the blog, but at the top of every md file, I write a little information about the file and blog. So the name of the Blog, a mini description, the date of writing the blog etc.</p>
+<p>In order to use this data, I have to parse this Frontmatter. The frontmatter looks something like this</p>
+<pre><code class="language-md">---
+Name: &lt;name-of-blog&gt;
+Date: DD/MM/YYYY
+Tags: ['Depends', 'on', 'what']
+Description: A simple one-liner of the blog
+---
+</code></pre>
+<p>Now in order to parse this, I wrote a small helper function that separates the Frontmatter from the rest of the blog</p>
+<pre><code class="language-c++">Frontmatter parseFrontmatter(const string &amp;text, string &amp;bodyOut) {
+  Frontmatter fm;
+
+  if (text.rfind(&quot;---&quot;, 0) != 0) {
+    bodyOut = text;
+    return fm;
+  }
+
+  size_t end = text.find(&quot;\n---&quot;, 3);
+  if (end == string::npos) {
+    bodyOut = text;
+    return fm;
+  }
+
+  string fmText = text.substr(3, end - 3);
+  bodyOut = text.substr(end + 4);
+
+... Clipped
+</code></pre>
+<p>This searches for the Frontmatter that is present at the top of the file. If the Frontmatter doesn't exist, then it treats the entire file as a simple Markdown.</p>
+<h2 id="reading-markdown-files">Converting Markdown to HTML</h2>
+<p>The biggest and core part of this project resides here. Like any sane person would, instead of writing my own parser, I decided to use <strong>md4c</strong>, which is a fast and minimal Markdown Parsing Library for C/C++.</p>
+<pre><code class="language-c++">md_html(
+  mdBody.c_str(),
+  mdBody.size(),
+  md_output_callback,
+  &amp;html,
+  0,
+  0
+);
+</code></pre>
+<p>The callback function appends the generated HTML directly into a string, avoiding unnecessary buffers and memory usage.</p>
+<h2 id="reading-markdown-files">Generating Table of Contents</h2>
+<p>So at the top of this page, you see a Table of Contents with all the heading and subheading right? Yea, I wrote a function that parses through the Markdown to extract headings.
+I made sure that code snippets with comments in them are <strong>not</strong> considered as headings</p>
+<p>These headings that are parsed are then used to build a Table of Contents in a hierarchical manner. Each heading is given a URL-friendly ID with kebab-case, allowing clicking on a ToC link to directly jump you there</p>
+<pre><code class="language-c++">    vector&lt;Heading&gt; tocList = extractHeadings(mdBody);
+    string tocHtml = buildTOC(tocList);
+
+
+vector&lt;Heading&gt; extractHeadings(string &amp;markdown) {
+  vector&lt;Heading&gt; list;
+  istringstream ss(markdown);
+  string line;
+
+  while (getline(ss, line)) {
+    size_t level = 0;
+
+    while (level &lt; line.size() &amp;&amp; line[level] == '#')
+      level++;
+
+    if (level &gt; 0 &amp;&amp; line.size() &gt; level + 1) {
+      string text = line.substr(level + 1);
+      string id = kebabThisShit(text);
+
+      list.push_back({(int)level, text, id});
+    }
+  }
+
+  return list;
+}
+
+string buildTOC(const vector&lt;Heading&gt; &amp;list) {
+  if (list.empty())
+    return &quot;&quot;;
+
+  string html = &quot;&lt;div class=\&quot;toc\&quot;&gt;\n&lt;h2&gt;Table of Contents&lt;/h2&gt;\n&lt;ul&gt;\n&quot;;
+
+  int lastLevel = 0;
+
+  for (auto &amp;h : list) {
+    while (h.level &gt; lastLevel) {
+      html += &quot;&lt;ul&gt;\n&quot;;
+      lastLevel++;
+    }
+    while (h.level &lt; lastLevel) {
+      html += &quot;&lt;/ul&gt;\n&quot;;
+      lastLevel--;
+    }
+
+    html += &quot;&lt;li&gt;&lt;a href=\&quot;#&quot; + h.id + &quot;\&quot;&gt;&quot; + h.text + &quot;&lt;/a&gt;&lt;/li&gt;\n&quot;;
+  }
+
+  while (lastLevel &gt; 0) {
+    html += &quot;&lt;/ul&gt;\n&quot;;
+    lastLevel--;
+  }
+
+  html += &quot;&lt;/div&gt;\n&quot;;
+  return html;
+}
+</code></pre>
+<p>These two functions combined, help generate the Table of Contents so it's easier for all users to access stuff.</p>
+<h2 id="reading-markdown-files">Rendering Templates</h2>
+<p>HTML templates are kept very simple. They use placeholders that can be easily identified and are unique.</p>
+<pre><code class="language-c++">  size_t pos = page.find(&quot;{{content}}&quot;);
+  if (pos != string::npos)
+    page.replace(pos, strlen(&quot;{{content}}&quot;), content.str());
+</code></pre>
+<p>This avoids the need of a full template engine, and keeps the entire code easy to understand and modify.</p>
+<h2 id="reading-markdown-files">Post Navigation</h2>
+<p>Once all the blog posts are generated, it feels nice to be able to move between them without going back to the homepage every single time.</p>
+<p>Since the sites are generated at build time, post navigation has to be done at build time as well. The idea for this is simple: once all posts are collected, sort them, then link each post to the previous and the next one.</p>
+<pre><code class="language-c++">  std::sort(posts.begin(), posts.end(), [](const Post &amp;a, const Post &amp;b) {
+    return a.filename &lt; b.filename;
+  });
+...
+
+...
+    string nav;
+
+    if (i &gt; 0) {
+      nav += &quot;&lt;a href=\&quot;&quot; + posts[i - 1].filename + &quot;\&quot;&gt;← &quot; +
+             posts[i - 1].title + &quot;&lt;/a&gt;&quot;;
+    }
+
+    if (!nav.empty())
+      nav += &quot; | &quot;;
+    nav += &quot;&lt;a href=\&quot;index.html\&quot;&gt;Home&lt;/a&gt;&quot;;
+
+    if (i + 1 &lt; posts.size()) {
+      nav += &quot; | &lt;a href=\&quot;&quot; + posts[i + 1].filename + &quot;\&quot;&gt;&quot; +
+             posts[i + 1].title + &quot; →&lt;/a&gt;&quot;;
+    }
+</code></pre>
+<p>This generates a simple previous/next navigation along with a link to the homepage as well. Since all of this is static, there is no runtime magic. It's all HTML links</p>
+<h2 id="reading-markdown-files">Generating the Index Page</h2>
+<p>The index page is what ties up everything together. You can go anywhere in the website from here.</p>
+<p>Instead of hardcoding the page, it's generated dynamically with using another template</p>
+<pre><code class="language-c++">void generateIndexPage(const vector&lt;Post&gt; &amp;posts, const string &amp;indexLayout) {
+  stringstream content;
+
+  for (auto &amp;p : posts) {
+    content &lt;&lt; &quot;&lt;div class=\&quot;post-card\&quot;&gt;&quot;
+            &lt;&lt; &quot;&lt;h3&gt;&lt;a href=\&quot;&quot; &lt;&lt; p.filename &lt;&lt; &quot;\&quot;&gt;&quot; &lt;&lt; p.title &lt;&lt; &quot;&lt;/a&gt;&lt;/h3&gt;&quot;
+            &lt;&lt; &quot;&lt;/div&gt;\n&quot;;
+  }
+
+  string page = indexLayout;
+
+  size_t pos = page.find(&quot;{{content}}&quot;);
+  if (pos != string::npos)
+    page.replace(pos, strlen(&quot;{{content}}&quot;), content.str());
+
+  ofstream out(&quot;dist/index.html&quot;);
+  out &lt;&lt; page;
+}
+</code></pre>
+<p>Each page is rendered as a simple card that links to the corresponding HTML file. This keeps the homepage clean and makes adding new posts as easy as making a new markdown file in the <code>content/</code> directory.</p>
+<h1 id="requirements">Putting Everything Together</h1>
+<p>Once all these small individual pieces are done, the main function ties it together, and it does the following in this order:</p>
+<ol>
+<li>Read all the Markdown Files</li>
+<li>Parse Frontmatter and Content</li>
+<li>Convert Markdown to HTML</li>
+<li>Generate a Table of Contents</li>
+<li>Render Templates</li>
+<li>Add navigation</li>
+<li>Generate Index Page</li>
+</ol>
+<p>Since we are using an external library for this and need to link them during compile, I decided to make a simple <code>Makefile</code> that compiles the code for me, then runs the compiled output, and generate all the html files inside the <code>dist/</code> directory which can then be uploaded on a server.</p>
+<h1 id="requirements">What I Learnt</h1>
+<p>Over the course of the few days that I did this project I learnt a few things. I learnt that C++ is an insanely fun language to work with and a lot of stuff works, but after messing around a lot.</p>
+<p>I still use NextJS, but only for when I want to build a full website with interactivity and styles and all that good stuff. For this blog I felt that a more chill, simple, HTML file works perfectly fine.</p>
+<p>So I have now managed to successfully build another tool in a language that it <em>generally</em> shouldn't be written in, but that's me. I do stuff in ways that it shouldn't be done in. It's not the most optimal thing, but I do it my way.</p>
+
+    </main>
+
+    <hr class="neon-divider">
+
+    <div class="navigation-menu tron-panel">
+      <a href="Raylib.html">←  Raylib over OpenGL for a Gravity Sim??</a> | <a href="index.html">Home</a> | <a href="Technical.html"> Basic Technical Concepts →</a>
+    </div>
+
+  </body>
+</html>
