@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Memory Forensics and Analysis of RAM</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body class="tron-grid">
+
+    <nav class="site-nav tron-panel">
+  <a href="../index.html">~/home</a>
+  <a href="../blog/index.html">~/blog</a>
+</nav>
+
+
+    <div class="toc tron-panel">
+      <div class="toc">
+<h2>Table of Contents</h2>
+<ul>
+<ul>
+<li><a href="#what-is-volatile-memory">What is Volatile Memory?</a></li>
+<li><a href="#memory-acquisition-tools">Memory Acquisition Tools</a></li>
+<li><a href="#memory-capture-in-linux">Memory Capture in Linux</a></li>
+<ul>
+<li><a href="#lime">LiME</a></li>
+<li><a href="#avml">AVML</a></li>
+</ul>
+<li><a href="#analysis-through-volatility">Analysis Through Volatility</a></li>
+<ul>
+<li><a href="#installing-volatility">Installing Volatility</a></li>
+</ul>
+<li><a href="#create-a-virtual-environment">Create a Virtual Environment</a></li>
+<ul>
+<ul>
+<li><a href="#viewing-system-information">Viewing System information</a></li>
+<li><a href="#listing-running-processes">Listing Running Processes</a></li>
+</ul>
+</ul>
+<li><a href="#linux-ram-dump">Linux RAM Dump</a></li>
+<li><a href="#windows-ram-dump">Windows RAM Dump</a></li>
+<ul>
+<ul>
+<li><a href="#process-tree">Process Tree</a></li>
+</ul>
+</ul>
+<li><a href="#linux-ram-dump">Linux RAM Dump</a></li>
+<li><a href="#windows-ram-dump">Windows RAM Dump</a></li>
+<ul>
+<li><a href="#why-memory-analysis-matters">Why Memory Analysis Matters</a></li>
+</ul>
+<li><a href="#wrapping-it-up">Wrapping it Up</a></li>
+</ul>
+</div>
+
+    </div>
+
+    <main class="tron-content">
+      <p>This is <strong>Part 2</strong> of our Digital Forensics series. If you haven't read the previous part, go ahead and read it right now. That part talks about what <strong>Digital Forensics is</strong>, why we use it and how we start off with an investigation.</p>
+<p>In the previous part we only learned how we can <strong>clone an entire disk or a partition</strong> of the disk. But another important part of a machine is the Live Memory, or RAM.</p>
+<p>If a system is On, we need to capture the RAM because it can contain information about what processes were running and possibly also encryption keys and other important evidence.</p>
+<h1 id="what-is-volatile-memory">What is Volatile Memory?</h1>
+<p>Unlike a Hard Disk or a Storage Device, the RAM is Volatile Memory. This means that when the machine is switched off, all the data is erased from existence.</p>
+<p>When the system shuts down:</p>
+<ul>
+<li>All contents in the RAM are <strong>immediately erased</strong></li>
+<li>Running Processes disappear</li>
+<li>Temporary Artifacts are lost forever</li>
+</ul>
+<p>Additionally, launching a new application will change the state of the RAM, creating new processes and erasing existing processes.</p>
+<p>Due to the Volatile nature of RAM, investigators mus capture the memory as quickly and securely as possible without altering the RAM state by a lot.</p>
+<p>This means that we cannot use tools like <code>dd</code> or <code>Guymager</code> as these tools are only for disk drivers and not for memory acquisition.</p>
+<h1 id="what-is-volatile-memory">Memory Acquisition Tools</h1>
+<p>Due to the difference in the Operating System structure, each OS uses different tools to capture the Live Memory.</p>
+<p>On Windows systems, we can use tools like <code>FTK Imager</code> and <code>DumpIt</code> in order to capture the <strong>full memory dump</strong>.</p>
+<p><strong>Keep in mind that the memory dump size is going to be as big as your RAM size.</strong>
+So if you have a machine with 32GB of RAM, the memory dump that is created will also be 32GB.</p>
+<p>On Linux it's a little trickier than installing an application and clicking &quot;Capture&quot;. Linux typically requires a few <strong>kernel level tools</strong> in order to extract the memory safely.</p>
+<h1 id="what-is-volatile-memory">Memory Capture in Linux</h1>
+<p>On Linux systems, the commonly used tools for capturing RAM are:</p>
+<ul>
+<li><strong>LiME (Linux Memory Extractor) <a href="https://github.com/504ensicsLabs/LiME">Link to GitHub</a></strong></li>
+<li><strong>AVML (Acquire Volatile Memory for Linux) <a href="https://github.com/microsoft/avml">Link to GitHub</a></strong></li>
+</ul>
+<p>Both these tools allow investigators to create a memory dump (snapshot) of the machine's RAM at the given state of time</p>
+<p>Now in order to analyze what the RAM Dump says, we use another tool called <strong>Volatility</strong> which we will also be going over here.</p>
+<h2 id="lime">LiME</h2>
+<p>LiME is a Loadable Kernel Module, meaning that it's a piece of software that can be added to the OS in order to extend the capabilities of the OS.
+LiME can also be added and removed dynamically, meaning that we don't have to reboot the system in order for it to work.</p>
+<p>Using LiME is very easy and straightforward. Steps included in this are:</p>
+<ol>
+<li>Clone the Repository:</li>
+</ol>
+<pre><code class="language-shell">git clone https://github.com/504ensicsLabs/LiME.git
+</code></pre>
+<ol start="2">
+<li>Compile the Module:</li>
+</ol>
+<pre><code class="language-shell">cd LiME/
+make
+</code></pre>
+<p>The <code>make</code> command compiles the source code and generates a <code>.ko</code> file, which is a Linux Kernel Module.</p>
+<ol start="3">
+<li>Load into the Kernel</li>
+</ol>
+<pre><code class="language-shell">sudo insmod lime.ko &quot;path=~/Evidence/dump.mem format=raw&quot;
+</code></pre>
+<p>Using the <code>insmod</code> command, we load the Linux Kernel Module and we can extract the RAM dump which is stored at the location that you chose while running the command.</p>
+<h2 id="lime">AVML</h2>
+<p>AVML is another tool that has been developed by Microsoft (ironic) and the advantage it has over LiME is that there is no on machine compilation required.</p>
+<p>It's a static binary that has been deployed and can be used on x86_64 machines without any need of compilation or knowing the kernel at all.</p>
+<p>The image will also be compressed by default, or uses the LiME output format when uncompressed, so all the output files have the extension <code>.lime</code></p>
+<ol>
+<li>Installation
+Depending on your distro, it's as easy as</li>
+</ol>
+<pre><code class="language-shell">yay -S avml # Arch
+
+sudo apt install avml # Debian
+</code></pre>
+<ol start="2">
+<li>Usage</li>
+</ol>
+<pre><code class="language-shell">sudo avml output.lime # Uncompressed
+sudo avml --compress output.lime.compressed # Compressed
+</code></pre>
+<p>Although it's not as easy as clicking a button that says &quot;Acquire&quot;, it's still relatively easy to get the memory dump of Linux machines that can be used for analysis</p>
+<h1 id="what-is-volatile-memory">Analysis Through Volatility</h1>
+<p>Capturing the RAM Dump is only the first step of Memory Forensics. The real fun comes in when you have to take this gibberish and make sense out of it.</p>
+<p>The output that we see is in a very weird file format which cannot be read by any of our standard tools. So for this we have to introduce another tool called as <strong>Volatility</strong></p>
+<p>This is an open source memory forensic framework that allows us to analyze RAM dumps and get artifacts like:</p>
+<ul>
+<li>Running Processes</li>
+<li>Network Connections</li>
+<li>Loaded Kernel Modules</li>
+</ul>
+<p>It works on a <strong>plugin-based system</strong>, where each plugin extends the capabilities of the tool further and further, thus making it easier and convenient to extract specific information from the memory image.</p>
+<h2 id="lime">Installing Volatility</h2>
+<p>The newer version of Volatility, <strong>Volatility 3</strong> is what we'll be using because it is actively maintained by the community</p>
+<p>The recommended way to install Volatility is through Python's Package manager, pip</p>
+<pre><code class="language-shell"># Create a Virtual Environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install volatility3
+</code></pre>
+<p>Another way to install is by cloning the source repository and building it from source, which is more reliable in my opinion</p>
+<pre><code class="language-shell">git clone https://github.com/volatilityfoundation/volatility3.git
+cd volatility3
+pip install -r requirements.txt
+</code></pre>
+<p>Now you can run Volatility by running the command</p>
+<pre><code class="language-shell">python3 vol.py -h
+</code></pre>
+<p>This command displays all the available plugins and how to use Volatility</p>
+<h3 id="viewing-system-information">Viewing System information</h3>
+<p>Before we analyze any of the processes or files, we first have to learn about what the system is, or gather the <strong>basic system information</strong></p>
+<p>Volatility provides the <strong>banners</strong> plugin which helps identify the kernel and system information</p>
+<pre><code class="language-shell">python3 vol.py -f &lt;path_to_memory_dump&gt; banners
+</code></pre>
+<p>The banners plugin gives us information on</p>
+<ul>
+<li>Kernel Version</li>
+<li>Operating System Details</li>
+<li>Build Information</li>
+</ul>
+<p>Knowing this, we can understand what kind of machine the memory dump came from</p>
+<h3 id="viewing-system-information">Listing Running Processes</h3>
+<p>The main reason we take a memory dump is because we want to make a list of all the running processes at that specific moment in time</p>
+<p>The <strong>pslist</strong> plugin allows us to list out all the processes that were running</p>
+<pre><code class="language-shell"># Linux RAM Dump
+python3 vol.py -f &lt;path_to_memory_dump&gt; linux.pslist
+
+# Windows RAM Dump
+python3 vol.py -f &lt;path_to_memory_dump&gt; windows.pslist
+</code></pre>
+<p>This command will display the list of processes running along with:</p>
+<ul>
+<li>Process ID (PID)</li>
+<li>Parent Process ID (PPID)</li>
+<li>Process Name</li>
+<li>Process Start Time</li>
+<li>Offset</li>
+<li>Number of Threads
+And many other details</li>
+</ul>
+<p>We can use this information in order to generate a tree of which process was spawned by which process and we can also identify certain suspicious or unknown processes.</p>
+<h3 id="viewing-system-information">Process Tree</h3>
+<p>Like we mentioned earlier, we can make a tree of the processes based on who spawned what, by using the <strong>pstree</strong> banner</p>
+<pre><code class="language-shell"># Linux RAM Dump
+python3 vol.py -f &lt;path_to_memory_dump&gt; linux.pstree
+
+# Windows RAM Dump
+python3 vol.py -f &lt;path_to_memory_dump&gt; windows.pstree
+</code></pre>
+<p>This tree of processes allows us to understand</p>
+<ul>
+<li>Which process has been spawned by which parent process</li>
+<li>Whether a suspicious program was hiding behind a legitimate program</li>
+</ul>
+<h2 id="lime">Why Memory Analysis Matters</h2>
+<p>Memory Analysis allows us to read the machine as though it was right there and running, that may not be visible on the disk at all.</p>
+<p>Artifacts that can be discovered in the RAM can include:</p>
+<ul>
+<li>Malware that never touched the disk (Fileless Malware)</li>
+<li>Decrypted Files or Encryption Keys</li>
+<li>Active Network Sessions</li>
+<li>Scripts that are running in the background</li>
+</ul>
+<h1 id="what-is-volatile-memory">Wrapping it Up</h1>
+<p>In this part of our series in becoming a Digital Forensic Investigator, we learnt what a Memory Dump is, how to capture the Live Memory and how we can analyze the memory using tools like Volatility</p>
+
+    </main>
+
+    <hr class="neon-divider">
+
+    <div class="navigation-menu tron-panel">
+      <a href="Sand.html">&#8592;  Psychological warfare on myself so I stop Doomscrolling</a> | <a href="index.html">Blog</a> | <a href="Raylib.html"> Raylib over OpenGL for a Gravity Sim?? &#8594;</a>
+    </div>
+
+  </body>
+</html>
